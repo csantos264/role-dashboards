@@ -27,6 +27,7 @@ const Login = () => {
       localStorage.setItem("role", response.data.role); // Store role
   
       alert("Login successful!");
+      
       const userRole = response.data.role;
       if (userRole === "Admin") {
         navigate("/dashboard");
