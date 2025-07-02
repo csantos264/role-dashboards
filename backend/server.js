@@ -1,4 +1,3 @@
-// Import required modules
 const express = require("express");
 const mysql2 = require("mysql2");
 const bcrypt = require("bcryptjs");
@@ -6,12 +5,12 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("dotenv").config();
 
-// Initialize Express app
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Create MySQL connection pool
+//connect to MySQL database
 const db = mysql2.createPool({
   host: "localhost",
   user: "root",
@@ -22,8 +21,7 @@ const db = mysql2.createPool({
   queueLimit: 0,
 });
 
-// Test database connection
-// Logs success or error message
+// Test the database connection
 db.getConnection((err) => {
   if (err) {
     console.log("Database connection failed", err);
@@ -32,22 +30,19 @@ db.getConnection((err) => {
   }
 });
 
-// =========================
-// Register Route
-// =========================
-// Handles user registration
+
 app.post("/register", async (req, res) => {
   const { username, password, role } = req.body;
 
-  // Validate required fields
+
   if (!username || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  // Hash the password before storing
+ 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Check if user already exists
+  
   const checkUserSql = "SELECT * FROM users WHERE username = ?";
   db.query(checkUserSql, [username], (err, results) => {
     if (err) {
@@ -59,7 +54,7 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Insert new user into the database
+    
     const insertUserSql = "INSERT INTO users (username, password, role) VALUES (?,?, ?)";
     db.query(insertUserSql, [username, hashedPassword, role], (err, result) => {
       if (err) {
@@ -73,17 +68,16 @@ app.post("/register", async (req, res) => {
 });
 
 
-// Login Route
-// Handles user login and JWT token generation
+
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  // Validate required fields
+ 
   if (!username || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  // Find user in the database
+
   const sql = "SELECT * FROM users WHERE username = ?";
   db.query(sql, [username], async (err, results) => {
     if (err || results.length === 0) {
@@ -91,35 +85,34 @@ app.post("/login", (req, res) => {
     }
 
     const user = results[0];
-    // Compare provided password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid username or password" });
     }
 
-    // Generate JWT token with user info
+ 
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },  // role is included in the token
+      { id: user.id, username: user.username, role: user.role },  
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Log to confirm that role is included in the response
+    
     console.log("Login response:", { token, username: user.username, role: user.role });
 
-    // Send the role along with username and token in the response
+    
     res.json({
       message: "Login successful",
       token,
       username: user.username,
-      role: user.role, // Ensure this is being sent back
+      role: user.role, 
     });
   });
 });
 
 
-// Start the server
+
 app.listen(5000, () => {
   console.log("Server is running on Port 5000");
 });

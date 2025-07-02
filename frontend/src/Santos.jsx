@@ -8,24 +8,22 @@ const Santos = () => {
   const [userRole, setRole] = useState("");
 
   useEffect(() => {
-    // Retrieve the user and role from localStorage
     const storedUser = localStorage.getItem("username");
     const storedRole = localStorage.getItem("role");
 
-    console.log("Stored User:", storedUser); // Debugging log
-    console.log("Stored Role:", storedRole); // Debugging log
+    console.log("Stored User:", storedUser); 
+    console.log("Stored Role:", storedRole); 
 
     if (storedUser && storedRole) {
       setUser(storedUser);
       setRole(storedRole);
 
-      // If the user is not a staff member, redirect them
       if (storedRole !== "Staff3") {
-        console.log("Not Staff, redirecting to login..."); // Debugging log
+        console.log("Not Staff, redirecting to login..."); 
         navigate("/login");
       }
     } else {
-      console.log("No user or role found, redirecting to login..."); // Debugging log
+      console.log("No user or role found, redirecting to login..."); 
 
     }
   }, [navigate]);
@@ -40,7 +38,6 @@ const Santos = () => {
         variant="contained"
         color="secondary"
         onClick={() => {
-          // Clear localStorage and redirect to login
           localStorage.removeItem("token");
           localStorage.removeItem("username");
           localStorage.removeItem("role");
